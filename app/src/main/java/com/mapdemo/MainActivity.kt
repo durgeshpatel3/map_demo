@@ -19,7 +19,6 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import com.mapdemo.databinding.ActivityMainBinding
 import java.util.*
 
@@ -30,15 +29,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mFusedLocationClient : FusedLocationProviderClient
     private val permissionId = 2
     private var mLastLocation: Location? = null
-    private var latitude: String? = null
-    private var longitude: String? = null
-    private val DEFAULT_ZOOM = 15F
+    private val defaultZoom = 15F
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        //init LocationServiced here
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         initView()
     }
@@ -51,11 +49,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mGoogleMap = googleMap
-        //Add a marker in Gujarat India
-//        val sydney = LatLng(-34.0, 151.0)
-//        mGoogleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
-
         getLocation()
     }
 
@@ -87,26 +80,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun moveCameraOnUpdatedLocation() {
         mGoogleMap.clear()
-        if (mLastLocation != null) {
-            latitude = mLastLocation!!.latitude.toString()
-            longitude = mLastLocation!!.longitude.toString()
-            Log.e("TAG", "latitude : $latitude and longitude : $longitude")
-            drawMarker(mLastLocation!!.latitude, mLastLocation!!.longitude)
+        mLastLocation?.let {
+            Log.e("TAG", "latitude : $it.latitude.toString() and longitude : $it.longitude.toString()")
+
+            val latLng = LatLng(it.latitude, it.longitude)
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, defaultZoom)
+            mGoogleMap.animateCamera(cameraUpdate)
+            mGoogleMap.isMyLocationEnabled = true
         }
-//        dispatchToHomeBusinessService()
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun drawMarker(lat: Double, lon: Double) {
-        val latLng = LatLng(lat, lon)
-        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM)
-//        mGoogleMap.addMarker(MarkerOptions().position(latLng).title("Current Location"))
-        // mGoogleMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
-        mGoogleMap.animateCamera(cameraUpdate)
-
-        mGoogleMap.isMyLocationEnabled = true
     }
 
     private fun checkPermissions(): Boolean {
