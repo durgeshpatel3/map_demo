@@ -17,7 +17,7 @@ First, clone the repo:
 
 Open the local.properties in your project level directory, and replace YOUR_API_KEY with your API key. 
 
-    MAPS_API_KEY=YOUR_API_KEY
+    GOOGLE_MAPS_API_KEY=YOUR_API_KEY
 
 ## Sample app screenshot
 
